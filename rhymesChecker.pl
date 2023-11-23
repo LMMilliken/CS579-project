@@ -1,3 +1,6 @@
+:- module(rhymesChecker, [understand_structure/2]).
+:- use_module(lexicon, [ph/2]).
+:- use_module(utils, [last_phon/2]).
 % Define a predicate to check if a character is a vowel
 % I check only for upper cases, since the dataset is built using those
 is_vowel(Char) :-!,
@@ -38,52 +41,55 @@ are_in_rhyme(X, Y):- ph(X, XLEX), ph(Y, YLEX),!, reverse(XLEX, REVX), reverse(YL
 are_in_rhyme(X, Y) :- \+ ph(X, _), ph(Y, _).
 are_in_rhyme(X, Y) :- ph(X, _), \+ ph(Y, _).
 
+approximate_rhyme(X, Y) :- last_phon(X, XPHON), last_phon(Y, YPHON), XPHON = YPHON.
+
+
 check_quartine_single(X, Y, W, Z) :- are_in_rhyme(X, Y), are_in_rhyme(Y, W), are_in_rhyme(W, Z).
 
 %AAAA AAAA AAAA
-check_mono(X, Y, W, Z, A, B, C, D) :- check_quartine_single(X, Y, W, Z), check_quartine_single(A, B, C, D), are_in_rhyme(Z, A).
+check_mono([X, Y, W, Z, A, B, C, D]) :- check_quartine_single(X, Y, W, Z), check_quartine_single(A, B, C, D), are_in_rhyme(Z, A).
 
 %AAAA BBBB CCCC 
-check_quartine(X, Y, W, Z, A, B, C, D) :- check_quartine_single(X, Y, W, Z), check_quartine_single(A, B, C, D).
+check_quartine([X, Y, W, Z, A, B, C, D]) :- check_quartine_single(X, Y, W, Z), check_quartine_single(A, B, C, D).
 
 check_kissed_single(X, Y, W, Z) :- are_in_rhyme(X, Y), are_in_rhyme(W, Z).
 
 % Example of this: The Canterbury Tales, Chaucer
 %AABB CCDD EEFF
-check_kissed(X, Y, W, Z, A, B, C, D) :- check_kissed_single(X, Y, W, Z), check_kissed_single(A, B, C, D).
+check_kissed([X, Y, W, Z, A, B, C, D]) :- check_kissed_single(X, Y, W, Z), check_kissed_single(A, B, C, D).
 
 check_concatenated_single(X, Y, W, Z) :- are_in_rhyme(X, W), are_in_rhyme(Y, Z).
 
 %ABAB CDCD EFEF
-check_concatenated(X, Y, W, Z, A, B, C, D) :- check_concatenated_single(X, Y, W, Z), check_concatenated_single(A, B, C, D).
+check_concatenated([X, Y, W, Z, A, B, C, D]) :- check_concatenated_single(X, Y, W, Z), check_concatenated_single(A, B, C, D).
 
 check_closed_single(X, Y, W, Z) :- are_in_rhyme(X, Z), are_in_rhyme(Y, W).
 
 %ABBA CDDC EFFE
-check_closed(X, Y, W, Z, A, B, C, D) :- check_closed_single(X, Y, W, Z), check_closed_single(A, B, C, D).
+check_closed([X, Y, W, Z, A, B, C, D]) :- check_closed_single(X, Y, W, Z), check_closed_single(A, B, C, D).
 
 check_incatenated_signle(X, Y, W) :- are_in_rhyme(X, W), \+ are_in_rhyme(Y, W).
 
 %ABA BCB CDC DED
-check_incatenated(X, Y, W, Z, A, B, C, D) :- check_incatenated_signle(X, Y, W), check_incatenated_signle(Z, A, B), are_in_rhyme(Y, Z), are_in_rhyme(A, C), \+are_in_rhyme(C, D).
+check_incatenated([X, Y, W, Z, A, B, C, D]) :- check_incatenated_signle(X, Y, W), check_incatenated_signle(Z, A, B), are_in_rhyme(Y, Z), are_in_rhyme(A, C), \+are_in_rhyme(C, D).
 
 %ABAB CDCD EFEF GG
-check_english_sonet(V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14) :- check_concatenated(V1, V2, V3, V4, V5, V6, V7, V8), check_concatenated_single(V9, V10, V11, V12), are_in_rhyme(V13, V14)
-\+ are_in_rhyme(V1, V5), \+ are_in_rhyme(V1, V6), \+ are_in_rhyme(V1, V9), \+ are_in_rhyme(V1, V10), \+ are_in_rhyme(V1, V13),
-\+ are_in_rhyme(V2, V5), \+ are_in_rhyme(V2, V6), \+ are_in_rhyme(V2, V9), \+ are_in_rhyme(V2, V10), \+ are_in_rhyme(V2, V13),
-\+ are_in_rhyme(V5, V9), \+ are_in_rhyme(V5, V10), \+ are_in_rhyme(V5, V13),
-\+ are_in_rhyme(V6, V9), \+ are_in_rhyme(V6, V10), \+ are_in_rhyme(V6, V13),
-\+ are_in_rhyme(V9, V13),
-\+ are_in_rhyme(V10, V13).
+check_english_sonet(V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14) :- check_concatenated(V1, V2, V3, V4, V5, V6, V7, V8), check_concatenated_single(V9, V10, V11, V12), are_in_rhyme(V13, V14),
+    \+ are_in_rhyme(V1, V5), \+ are_in_rhyme(V1, V6), \+ are_in_rhyme(V1, V9), \+ are_in_rhyme(V1, V10), \+ are_in_rhyme(V1, V13),
+    \+ are_in_rhyme(V2, V5), \+ are_in_rhyme(V2, V6), \+ are_in_rhyme(V2, V9), \+ are_in_rhyme(V2, V10), \+ are_in_rhyme(V2, V13),
+    \+ are_in_rhyme(V5, V9), \+ are_in_rhyme(V5, V10), \+ are_in_rhyme(V5, V13),
+    \+ are_in_rhyme(V6, V9), \+ are_in_rhyme(V6, V10), \+ are_in_rhyme(V6, V13),
+    \+ are_in_rhyme(V9, V13),
+    \+ are_in_rhyme(V10, V13).
 
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_mono(X, Y, W, Z, A, B, C, D), Res = "Mono", !.
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_quartine(X, Y, W, Z, A, B, C, D), Res = "Quartine", !.
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_kissed(X, Y, W, Z, A, B, C, D), Res = "Kissed", !.
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_concatenated(X, Y, W, Z, A, B, C, D), Res = "Concatenated", !.
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_closed(X, Y, W, Z, A, B, C, D), Res = "Closed", !.
-understand_structure(X, Y, W, Z, A, B, C, D, Res) :- check_incatenated(X, Y, W, Z, A, B, C, D), Res = "Incatenated", !.
+understand_structure([X, Y, W, Z, A, B, C, D], mono) :- check_mono([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D], quartine) :- check_quartine([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D], kissed) :- check_kissed([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D], concatenated) :- check_concatenated([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D], closed) :- check_closed([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D], incatenated) :- check_incatenated([X, Y, W, Z, A, B, C, D]), !.
 
-understand_structure(_, _, _, _, _, _, _, _, Res) :- Res = "Unknown".
+% understand_structure(_, unknown).
 
 % Authors
 % Classifier

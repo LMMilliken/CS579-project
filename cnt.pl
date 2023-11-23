@@ -1,5 +1,7 @@
-:- module(cnt, [ns/2, load_syllables/1, analyse_lines/1, read_input/1]).
-:- use_module(readLine,[readLine/1]).
+:- module(cnt, [ns/2, load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
+:- use_module(utils, [add_tuple/3, sum_tuples/2, sum/2]).
+:- use_module(read, [read_input/1]).
+:- use_module(library(csv)).
 
 ns([X|XS], N) :- map(ns, [X|XS], Sylls), sum(Sylls, N), !.
 ns(X, N) :- \+ X = [], \+ X = [_, _], syl_db(X, N), !.
@@ -9,9 +11,15 @@ load_syllables(Fname) :-
     csv_read_file(Fname, Rows, [functor(row)]),
     assert_syllables(Rows).
 
+map(_, [], []).
+map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).
+
+analyse_lines(Input, Ret) :- 
+    map(analyse_line, Input, Ret).
+
 analyse_lines(Ret) :-
     read_input(Input),
-    map(analyse_line, Input, Ret).
+    analyse_lines(Input, Ret).
 
 vowel(a).
 vowel(e).
@@ -49,97 +57,13 @@ num_syllables([_], 1).
 syl(X, N) :- atom_chars(X, Chars), num_syllables(Chars, N).
 
 
-:- use_module(library(csv)).
 
 assert_syllables([]).
 assert_syllables([row(Word, N) | Rows]) :- assert(syl_db(Word, N)), assert_syllables(Rows).
 
-read_input1(Stream, []) :- at_end_of_stream(Stream).
-read_input1(Stream, [X|XS]) :- \+ at_end_of_stream(Stream), read(Stream, X), read_input1(Stream, XS).
-
-read_input(Fname, Ret) :-
-    open(Fname, read, Str),
-    readWords(Str, [], Ret),
-    close(Str).
-read_input(Ret) :- read_input('in.txt', Ret).
-
-readWord(InStream, W, State):-
-        get_code(InStream,Char),
-        checkCharAndReadRest(Char,Chars,InStream, State),
-        convertWord(Chars, Clean),
-        atom_codes(W,Clean).
-        
-readWords(InStream, Acc, Ret) :-
-    readWord(InStream, Word, State),
-    !,
-    continue(InStream, State, Word, Acc, Ret).
-
-readWords(InStream, Acc, Ret) :-
-    readWord(InStream, Word, State), !,
-    State = newword,
-    readWords(InStream, [Word | Acc], Ret).
-
-continue(_, fin, Word, Acc, [Line]) :-
-    reverse([Word | Acc], Line).
-continue(InStream, newline, Word, Acc, [Line | Ret]) :-
-    reverse([Word | Acc], Line),
-    readWords(InStream, [], Ret).
-continue(InStream, newword, Word, Acc, Ret) :-
-    readWords(InStream, [Word | Acc], Ret).
-
-
-convertWord([],[]):- !.
-
-convertWord([Capital|Rest1],[Small|Rest2]):-
-   Capital > 64, Capital < 91, !,
-   Small is Capital + 32,
-   convertWord(Rest1,Rest2).
-
-convertWord([Number|Rest1],[Number|Rest2]):-
-   Number > 47, Number < 58, !,
-   convertWord(Rest1,Rest2).
-
-convertWord([Weird|Rest1],Rest2):-
-   (Weird < 97; Weird > 122), (\+ Weird = 10), !,
-   convertWord(Rest1,Rest2).
-
-convertWord([Char|Rest1],[Char|Rest2]):-
-   convertWord(Rest1,Rest2).
-
-
-checkCharAndReadRest(10,[],_, newline):- !.
-
-checkCharAndReadRest(32,[],_, newword):- !.
-
-checkCharAndReadRest(-1,[],_, fin):- !.
-
-checkCharAndReadRest(end_of_file,[],_, fin):-  !.
-
-% checkCharAndReadRest(Char,[Char|Chars],InStream, newline):-
-%         Char = 10,
-%         write('NOW THERES A NEWLINE'), !.
-
-
-checkCharAndReadRest(Char,[Char|Chars],InStream, State):-
-        get_code(InStream,NextChar),
-        checkCharAndReadRest(NextChar,Chars,InStream, State).
-
-add_tuple(pair(X1, X2), pair(Y1, Y2), pair(Z1, Z2)) :- Z1 is X1 + Y1, Z2 is X2 + Y2.
-
-sum_tuples([], pair(0, 0)).
-sum_tuples([X|XS], Ret) :- sum_tuples(XS, Sum), add_tuple(X, Sum, Ret).
-
-sum([], 0).
-sum([X|XS], Ret) :- sum(XS, Sum), Ret is X + Sum.
 
 analyse_line1([], []).
 analyse_line1([Word | Sentence], [N_syl | Ret]) :- ns(Word, N_syl), analyse_line1(Sentence, Ret).
-analyse_line(Sentence, pair(SumRet, LenRet)) :-
+analyse_line(Sentence, tuple(SumRet, LenRet)) :-
     analyse_line1(Sentence, Ret),
     length(Ret, LenRet), sum(Ret, SumRet).
-
-
-analyse_line(Ret) :- readLine(Input), analyse_line(Input, Ret).
-
-map(_, [], []).
-map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).

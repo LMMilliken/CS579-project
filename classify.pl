@@ -1,27 +1,36 @@
-:- use_module(cnt, [load_syllables/1, analyse_lines/1, read_input/1]).
+:- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
+:- use_module(rhymesChecker, [understand_structure/2]).
+:- use_module(utils, [map/3, end/2]).
 
-classify(pair(Styles, Authors)) :-
-    analyse_lines(Input),
-    classify_styles(Input, Styles),
+classify(tuple(Styles, Rhymes, Authors)) :-
+    read_input(Input),
+    analyse_lines(Input, Analysis),
+    classify_styles(Analysis, Styles),
+    classify_rhymes(Input, Rhymes),
     classify_authors(Styles, Authors).
 
-classify_styles(Input, Classes) :-
-    findall(Class, classify_style(Input, Class), Classes).
+classify_styles(Analysis, Classes) :-
+    findall(Class, classify_style(Analysis, Class), Classes).
 
-classify_style([pair(5, _), pair(7, _), pair(5, _)], haiku).
-classify_style(Input, syls(N)) :- list_all(Input, pair(N, _)).
+classify_style([tuple(5, _), tuple(7, _), tuple(5, _)], haiku).
+classify_style(Input, syls(N)) :- list_all(Input, tuple(N, _)).
 classify_style(Input, lines(N)) :- length(Input, N).
-% classify_style(_, undefined).
+
+classify_rhymes(Input, Rhymes) :-
+    map(end, Input, Ends),
+    findall(Rhyme, understand_structure(Ends, Rhyme), Rhymes).
+
 
 classify_work(Styles, the_raven) :- subset([syls(18), lines(6)], Styles).
 
 classify_authors(Styles, Authors) :-
     findall(Author, classify_author(Styles, Author), Authors).
+
 classify_author(Styles, shakespeare) :- subset([iambic_pentameter, lines_14], Styles).
 
 
-is_10(pair(10, _)).
+is_10(tuple(10, _)).
 
 num_lines([], 0).
 num_lines([_|XS], N) :- num_lines(XS, M), N is M + 1.
