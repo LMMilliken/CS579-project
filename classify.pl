@@ -1,7 +1,21 @@
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
 :- use_module(rhymesChecker, [understand_structure/3]).
-:- use_module(utils, [map/3, end/2, lowest_precision/2]).
+:- use_module(utils, [map/3, end/2, max_tuples/2, lowest_precision/2]).
+
+find_n_lines(NLines) :-
+    analyse_lines(Input),
+    classify_style(Input, NLines), !.
+
+find_rhyme_scheme(RhymeSchemes) :-
+    read_input(Input),
+    map(end, Input, Ends),
+    findall(Rhyme, understand_structure(Ends, Rhyme), RhymeSchemes), !.
+
+find_most_likely_author(MaxAuthors) :- 
+    classify(R), !,
+    R = tuple(_, _, Authors),
+    max_tuples(Authors, MaxAuthors),!.
 
 classify(tuple(Structures, Styles, Rhymes, Authors)) :-
     read_input(Input),
@@ -28,12 +42,25 @@ classify_rhymes(Input, Rhymes) :-
     map(end, Input, Ends),
     findall(tuple(Rhyme, Precision), understand_structure(Ends, Rhyme, Precision), Rhymes).
 
-
 classify_work(Styles, the_raven) :- subset([syls(18), lines(6)], Styles).
 
 classify_authors(Structures, Styles, Rhymes, Authors) :-
     findall(Author, classify_author(Structures, Styles, Rhymes, Author), Authors).
 
+classify_author(Rhymes, Styles, shakespeare, Matching_properties) :- 
+    check_property(lines(14), Styles, 0, N1),
+    check_property(iambic_pentameter, Styles, N1, N2),
+    check_property(english_sonet, Rhymes, N2, N3),
+    Matching_properties = N3.
+classify_author(Rhymes, Styles, elizabeth_bishop, Matching_properties) :-
+    check_property(lines(19), Styles, 0, N1),
+    check_property(iambic_pentameter, Styles, N1, N2),
+    check_property(villenelle, Rhymes, N2, N3),
+    Matching_properties = N3.
+
+check_property(Target, Properties, N, NewN) :- (subset([Target], Properties), !, NewN is N + 1; NewN is N).
+
+is_10(tuple(10, _)).
 classify_author(Structures, _, Rhymes, tuple(shakespeare, Precision)) :- 
     member(syls(10, P1), Structures), member(lines(14), Structures),
     member(tuple(english_sonnet, P2), Rhymes), lowest_precision([P1, P2], Precision).

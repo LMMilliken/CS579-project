@@ -1,4 +1,4 @@
-:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2, lowest_precision/2]).
+:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2, max_tuples/2, lowest_precision/2]).
 
 map(_, [], []).
 map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).
@@ -30,6 +30,26 @@ extract_after_last_vowel([H|T], [H|Sublist]) :-
     extract_after_last_vowel(T, Sublist).
 extract_after_last_vowel([H|_], []) :-
     vowel(H).
+
+max_tuples([], []).
+
+max_tuples([tuple(Name, Value) | Rest], MaxTuples) :-
+    max_tuples(Rest, RestMaxTuples),
+    
+    max_value_in_tuples(RestMaxTuples, RestMaxValue),
+    
+    (
+        Value > RestMaxValue, MaxTuples = [tuple(Name, Value)];
+        (
+            Value =:= RestMaxValue, MaxTuples = [tuple(Name, Value) | RestMaxTuples];
+            MaxTuples = RestMaxTuples
+        )
+    ).
+
+max_value_in_tuples([], 0).
+max_value_in_tuples([tuple(_, Value) | Rest], MaxValue) :-
+    max_value_in_tuples(Rest, RestMaxValue),
+    MaxValue is max(Value, RestMaxValue).
 
     
 lowest_precision([P|[]], P).

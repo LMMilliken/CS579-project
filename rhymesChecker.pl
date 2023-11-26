@@ -83,9 +83,11 @@ check_closed_single(X, Y, W, Z, Precision) :- are_in_rhyme(X, Z, P1), are_in_rhy
 check_closed([X, Y, W, Z, A, B, C, D], Precision) :- check_closed_single(X, Y, W, Z, P1), check_closed_single(A, B, C, D, P2),
     lowest_precision([P1, P2], Precision).
 
+check_incatenated_single(X, Y, W) :- are_in_rhyme(X, W), \+ are_in_rhyme(Y, W).
 check_incatenated_single(X, Y, W, P1) :- are_in_rhyme(X, W, P1), \+ are_in_rhyme(Y, W, exact).
 
 %ABA BCB CDC DED
+check_incatenated([X, Y, W, Z, A, B, C, D]) :- check_incatenated_single(X, Y, W), check_incatenated_single(Z, A, B), are_in_rhyme(Y, Z), are_in_rhyme(A, C), \+are_in_rhyme(C, D).
 check_incatenated([X, Y, W, Z, A, B, C, D], Precision) :- check_incatenated_single(X, Y, W, P1), check_incatenated_single(Z, A, B, P2),
     are_in_rhyme(Y, Z, P3), are_in_rhyme(A, C, P4), \+ are_in_rhyme(C, D, exact),
     lowest_precision([P1, P2, P3, P4], Precision).
@@ -99,7 +101,8 @@ check_english_sonet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14
     \+ are_in_rhyme(V9, V13, exact),
     \+ are_in_rhyme(V10, V13, exact),
     lowest_precision([P1, P2, P3], Precision).
-    
+
+
 
 understand_structure([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14 | _], english_sonnet, Precision) :- 
     check_english_sonet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision), !.
@@ -109,8 +112,16 @@ understand_structure([X, Y, W, Z, A, B, C, D | _], kissed, Precision) :- check_k
 understand_structure([X, Y, W, Z, A, B, C, D | _], concatenated, Precision) :- check_concatenated([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], closed, Precision) :- check_closed([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], incatenated, Precision) :- check_incatenated([X, Y, W, Z, A, B, C, D], Precision), !.
+%ABA ABA ABA
+check_villenelle([X, Y, Z, A, B, C]) :- check_incatenated_single(X, Y, Z), check_incatenated_single(A, B, C), are_in_rhyme(X, A), are_in_rhyme(B, Y).
+
+understand_structure([X, Y, W, Z, A, B |_], villenelle) :- check_villenelle([X, Y, W, Z, A, B]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], mono) :- check_mono([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], quartine) :- check_quartine([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], kissed) :- check_kissed([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], concatenated) :- check_concatenated([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], closed) :- check_closed([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D|_], incatenated) :- check_incatenated([X, Y, W, Z, A, B, C, D]), !.
+understand_structure([X, Y, W, Z, A, B, C, D, E, F, G, H, I, J], english_sonet) :- check_english_sonet(X, Y, W, Z, A, B, C, D, E, F, G, H, I, J), !.
 
 % understand_structure(_, unknown).
-
-% Authors
-% Classifier
