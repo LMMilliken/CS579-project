@@ -1,4 +1,4 @@
-:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2]).
+:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2, lowest_precision/2]).
 
 map(_, [], []).
 map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).
@@ -30,3 +30,8 @@ extract_after_last_vowel([H|T], [H|Sublist]) :-
     extract_after_last_vowel(T, Sublist).
 extract_after_last_vowel([H|_], []) :-
     vowel(H).
+
+    
+lowest_precision([P|[]], P).
+lowest_precision([approx|_], approx).
+lowest_precision([exact|PS], P) :- lowest_precision(PS, P).
