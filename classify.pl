@@ -1,14 +1,28 @@
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
 :- use_module(rhymesChecker, [understand_structure/2]).
-:- use_module(utils, [map/3, end/2]).
+:- use_module(utils, [map/3, end/2, max_tuples/2]).
+
+find_n_lines(NLines) :-
+    analyse_lines(Input),
+    classify_style(Input, NLines), !.
+
+find_rhyme_scheme(RhymeSchemes) :-
+    read_input(Input),
+    map(end, Input, Ends),
+    findall(Rhyme, understand_structure(Ends, Rhyme), RhymeSchemes), !.
+
+find_most_likely_author(MaxAuthors) :- 
+    classify(R), !,
+    R = tuple(_, _, Authors),
+    max_tuples(Authors, MaxAuthors),!.
 
 classify(tuple(Styles, Rhymes, Authors)) :-
     read_input(Input),
     analyse_lines(Input, Analysis),
     classify_styles(Analysis, Styles),
     classify_rhymes(Input, Rhymes),
-    classify_authors(Styles, Authors).
+    classify_authors(Rhymes, Styles, Authors).
 
 classify_styles(Analysis, Classes) :-
     findall(Class, classify_style(Analysis, Class), Classes).
@@ -21,14 +35,23 @@ classify_rhymes(Input, Rhymes) :-
     map(end, Input, Ends),
     findall(Rhyme, understand_structure(Ends, Rhyme), Rhymes).
 
-
 classify_work(Styles, the_raven) :- subset([syls(18), lines(6)], Styles).
 
-classify_authors(Styles, Authors) :-
-    findall(Author, classify_author(Styles, Author), Authors).
+classify_authors(Rhymes, Styles, Authors) :-
+    findall(tuple(Author, Matching_properties), classify_author(Rhymes, Styles, Author, Matching_properties), Authors).
 
-classify_author(Styles, shakespeare) :- subset([iambic_pentameter, lines_14], Styles).
+classify_author(Rhymes, Styles, shakespeare, Matching_properties) :- 
+    check_property(lines(14), Styles, 0, N1),
+    check_property(iambic_pentameter, Styles, N1, N2),
+    check_property(english_sonet, Rhymes, N2, N3),
+    Matching_properties = N3.
+classify_author(Rhymes, Styles, elizabeth_bishop, Matching_properties) :-
+    check_property(lines(19), Styles, 0, N1),
+    check_property(iambic_pentameter, Styles, N1, N2),
+    check_property(villenelle, Rhymes, N2, N3),
+    Matching_properties = N3.
 
+check_property(Target, Properties, N, NewN) :- (subset([Target], Properties), !, NewN is N + 1; NewN is N).
 
 is_10(tuple(10, _)).
 
