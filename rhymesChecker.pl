@@ -38,8 +38,12 @@ are_in_rhyme(X, Y):- ph(X, XLEX), ph(Y, YLEX),!, reverse(XLEX, REVX), reverse(YL
     last_elements(REVX, A), last_elements(REVY, B), A == B, !.
 % If one word is not in the lexicon we use it as jolly, so it rhymes with every other word (to be able to handle unknown words)
 % Decide if we want this behavior
-are_in_rhyme(X, Y) :- \+ ph(X, _), ph(Y, _).
-are_in_rhyme(X, Y) :- ph(X, _), \+ ph(Y, _).
+are_in_rhyme(X, Y) :-
+    (
+        \+ ph(X, _), ph(Y, _);
+        ph(X, _), \+ ph(Y, _)
+    ),
+    approximate_rhyme(X, Y).
 
 approximate_rhyme(X, Y) :- last_phon(X, XPHON), last_phon(Y, YPHON), XPHON = YPHON.
 

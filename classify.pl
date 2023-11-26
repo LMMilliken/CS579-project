@@ -37,3 +37,10 @@ num_lines([_|XS], N) :- num_lines(XS, M), N is M + 1.
 
 list_all([], _).
 list_all([X|XS], Pattern) :- X = Pattern, list_all(XS, Pattern).
+
+list_all_approx([], _, _, 0) :- !.
+list_all_approx([X|XS], Pattern, Margin, Ret) :- X = Pattern, list_all_approx(XS, Pattern, Margin, Ret).
+list_all_approx([X|XS], Pattern, Margin, Ret) :-
+    \+ X = Pattern,
+    X >= Pattern - Margin, X < Pattern + Margin + 1,
+    list_all_approx(XS, Pattern, Margin, Missed), Ret is Missed + 1.
