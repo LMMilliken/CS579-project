@@ -1,27 +1,28 @@
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
 :- use_module(rhymesChecker, [understand_structure/3]).
-:- use_module(utils, [map/3, end/2, max_tuples/2, lowest_precision/2]).
+:- use_module(utils, [map/3, end/2, max_tuples/2, lowest_precision/2, format_tuples/2]).
 
 find_n_lines(NLines) :-
     analyse_lines(Input),
-    classify_style(Input, NLines), !.
+    classify_structure(Input, lines(NLines)), !.
 
 find_rhyme_scheme(RhymeSchemes) :-
     read_input(Input),
     map(end, Input, Ends),
-    findall(Rhyme, understand_structure(Ends, Rhyme), RhymeSchemes), !.
+    findall((Rhyme, Precision), understand_structure(Ends, Rhyme, Precision), RhymeSchemes), !.
 
-find_most_likely_author(MaxAuthors) :- 
+find_most_likely_author(MaxAuthorsFormatted) :- 
     classify(R), !,
-    R = tuple(_, _, Authors),
-    max_tuples(Authors, MaxAuthors),!.
+    R = tuple(_, _,_, Authors),
+    max_tuples(Authors, MaxAuthors),!,
+    format_tuples(MaxAuthors, MaxAuthorsFormatted).
 
 classify(tuple(Structures, Styles, Rhymes, Authors)) :-
     read_input(Input),
     analyse_lines(Input, Analysis),
-    classify_structures(Analysis, Structures),
-    classify_styles(Analysis, Structures, Styles),
+    classify_structures(Analysis, Structures), 
+    classify_styles(Analysis, Structures, Styles), 
     classify_rhymes(Input, Rhymes),
     classify_authors(Structures, Styles, Rhymes, Authors).
 
@@ -45,26 +46,25 @@ classify_rhymes(Input, Rhymes) :-
 classify_work(Styles, the_raven) :- subset([syls(18), lines(6)], Styles).
 
 classify_authors(Structures, Styles, Rhymes, Authors) :-
-    findall(Author, classify_author(Structures, Styles, Rhymes, Author), Authors).
+    findall(tuple(Author, Matching_properties), classify_author(Structures, Styles, Rhymes, Author, Matching_properties), Authors), !.
 
-classify_author(Rhymes, Styles, shakespeare, Matching_properties) :- 
-    check_property(lines(14), Styles, 0, N1),
-    check_property(iambic_pentameter, Styles, N1, N2),
-    check_property(english_sonet, Rhymes, N2, N3),
+classify_author(Structure,_,Rhymes, tuple(shakespeare, Precision), Matching_properties) :- 
+    check_property(lines(14), Structure, 0, N1), 
+    check_property(syls(10, P1), Structure, N1, N2), 
+    check_property(tuple(english_sonet, P2), Rhymes, N2, N3), 
+    lowest_precision([P1, P2], Precision), 
     Matching_properties = N3.
-classify_author(Rhymes, Styles, elizabeth_bishop, Matching_properties) :-
-    check_property(lines(19), Styles, 0, N1),
-    check_property(iambic_pentameter, Styles, N1, N2),
-    check_property(villenelle, Rhymes, N2, N3),
+    
+classify_author(Structure,_,Rhymes, tuple(elizabeth_bishop, Precision), Matching_properties) :- 
+    check_property(lines(19), Structure, 0, N1),
+    check_property(syls(10, P1), Structure, N1, N2),
+    check_property(tuple(villenelle, P2), Rhymes, N2, N3),
+    lowest_precision([P1, P2], Precision),
     Matching_properties = N3.
 
 check_property(Target, Properties, N, NewN) :- (subset([Target], Properties), !, NewN is N + 1; NewN is N).
 
 is_10(tuple(10, _)).
-classify_author(Structures, _, Rhymes, tuple(shakespeare, Precision)) :- 
-    member(syls(10, P1), Structures), member(lines(14), Structures),
-    member(tuple(english_sonnet, P2), Rhymes), lowest_precision([P1, P2], Precision).
-
 
 num_lines([], 0).
 num_lines([_|XS], N) :- num_lines(XS, M), N is M + 1.

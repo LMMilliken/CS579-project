@@ -1,4 +1,4 @@
-:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2, max_tuples/2, lowest_precision/2]).
+:- module(utils, [map/3, add_tuple/3, sum_tuples/2, sum/2, end/2, last_phon/2, max_tuples/2, lowest_precision/2, format_tuples/2]).
 
 map(_, [], []).
 map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).
@@ -53,5 +53,10 @@ max_value_in_tuples([tuple(_, Value) | Rest], MaxValue) :-
 
     
 lowest_precision([P|[]], P).
-lowest_precision([approx|_], approx).
+lowest_precision([approx|_], approx) :- !.
 lowest_precision([exact|PS], P) :- lowest_precision(PS, P).
+
+format_tuples([], []).
+
+format_tuples([tuple(tuple(Name, Val), Val2) | Rest], [(Name, Val, Val2) | ResultRest]) :-
+    format_tuples(Rest, ResultRest).
