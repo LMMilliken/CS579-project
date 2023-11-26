@@ -51,7 +51,7 @@ classify_authors(Structures, Styles, Rhymes, Authors) :-
 classify_author(Structure,_,Rhymes, tuple(shakespeare, Precision), Matching_properties) :- 
     check_property(lines(14), Structure, 0, N1), 
     check_property(syls(10, P1), Structure, N1, N2), 
-    check_property(tuple(english_sonet, P2), Rhymes, N2, N3), 
+    check_property(tuple(english_sonnet, P2), Rhymes, N2, N3), 
     lowest_precision([P1, P2], Precision), 
     Matching_properties = N3.
     

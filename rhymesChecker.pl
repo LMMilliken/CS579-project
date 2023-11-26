@@ -90,7 +90,7 @@ check_incatenated([X, Y, W, Z, A, B, C, D], Precision) :- check_incatenated_sing
     lowest_precision([P1, P2, P3, P4], Precision).
 
 %ABAB CDCD EFEF GG
-check_english_sonet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision) :- check_concatenated([V1, V2, V3, V4, V5, V6, V7, V8], P1), check_concatenated_single(V9, V10, V11, V12, P2), are_in_rhyme(V13, V14, P3),
+check_english_sonnet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision) :- check_concatenated([V1, V2, V3, V4, V5, V6, V7, V8], P1), check_concatenated_single(V9, V10, V11, V12, P2), are_in_rhyme(V13, V14, P3),
     \+ are_in_rhyme(V1, V5, exact), \+ are_in_rhyme(V1, V6, exact), \+ are_in_rhyme(V1, V9, exact), \+ are_in_rhyme(V1, V10, exact), \+ are_in_rhyme(V1, V13, exact),
     \+ are_in_rhyme(V2, V5, exact), \+ are_in_rhyme(V2, V6, exact), \+ are_in_rhyme(V2, V9, exact), \+ are_in_rhyme(V2, V10, exact), \+ are_in_rhyme(V2, V13,exact),
     \+ are_in_rhyme(V5, V9, exact), \+ are_in_rhyme(V5, V10, exact), \+ are_in_rhyme(V5, V13, exact),
@@ -104,7 +104,7 @@ check_villenelle([X, Y, Z, A, B, C], Precision) :- check_incatenated_single(X, Y
     lowest_precision([P1, P2, P3, P4], Precision).
 
 understand_structure([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], english_sonnet, Precision) :- 
-    check_english_sonet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision), !.
+    check_english_sonnet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], quartine, Precision) :- check_quartine([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], mono, Precision) :- check_mono([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], kissed, Precision) :- check_kissed([X, Y, W, Z, A, B, C, D], Precision), !.
