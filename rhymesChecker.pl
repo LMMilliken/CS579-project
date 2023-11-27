@@ -105,8 +105,8 @@ check_villenelle([X, Y, Z, A, B, C], Precision) :- check_incatenated_single(X, Y
 
 understand_structure([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], english_sonnet, Precision) :- 
     check_english_sonnet([V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14], Precision), !.
-understand_structure([X, Y, W, Z, A, B, C, D | _], quartine, Precision) :- check_quartine([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], mono, Precision) :- check_mono([X, Y, W, Z, A, B, C, D], Precision), !.
+understand_structure([X, Y, W, Z, A, B, C, D | _], quartine, Precision) :- check_quartine([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], kissed, Precision) :- check_kissed([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], concatenated, Precision) :- check_concatenated([X, Y, W, Z, A, B, C, D], Precision), !.
 understand_structure([X, Y, W, Z, A, B, C, D | _], closed, Precision) :- check_closed([X, Y, W, Z, A, B, C, D], Precision), !.
