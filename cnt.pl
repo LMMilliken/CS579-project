@@ -1,4 +1,4 @@
-:- module(cnt, [ns/2, load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
+:- module(cnt, [ns/2, load_syllables/1, load_syllables/0, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(utils, [add_tuple/3, sum_tuples/2, sum/2]).
 :- use_module(read, [read_input/1]).
 :- use_module(library(csv)).
@@ -10,6 +10,11 @@ ns(X, N) :- \+ X = [], \+ X = [_, _], syl(X, N).
 load_syllables(Fname) :-
     csv_read_file(Fname, Rows, [functor(row)]),
     assert_syllables(Rows).
+
+load_syllables :- 
+    csv_read_file('data.csv', Rows, [functor(row)]),
+    assert_syllables(Rows).
+
 
 map(_, [], []).
 map(Pred, [X|Xs], [Y|Ys]) :- call(Pred, X, Y), map(Pred, Xs, Ys).

@@ -1,8 +1,10 @@
+:- module(classify, [classify/1, extract_attributes/1]).
+
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
 :- use_module(rhymesChecker, [understand_structure/3]).
 :- use_module(utils, [map/3, end/2, max_tuples/2, lowest_precision/2, format_tuples/2]).
-
+:- use_module(attributes, [attribute/1]).
 find_n_lines(NLines) :-
     analyse_lines(Input),
     classify_structure(Input, lines(NLines)), !.
@@ -26,12 +28,32 @@ classify(tuple(Structures, Styles, Rhymes, Authors)) :-
     classify_rhymes(Input, Rhymes),
     classify_authors(Structures, Styles, Rhymes, Authors).
 
+extract_attributes(Attributes) :-
+    read_input(Input),
+    analyse_lines(Input, Analysis),
+    classify_structures(Analysis, Structures), 
+    classify_styles(Analysis, Structures, Styles), 
+    classify_rhymes(Input, Rhymes),
+    attribute_list(Structures, A1),
+    attribute_list(Styles, A2),
+    attribute_list(Rhymes, A3),
+    append(A1, A2, A4),
+    append(A3, A4, A5),
+    attribute_list(A5, Attributes).
+
+
 classify_structures(Input, Structures) :- findall(Structure, classify_structure(Input, Structure), Structures).
 
+% GENERIC STRUCTURES
 classify_structure(Input, syls(N, exact)) :- list_all(Input, N).
 classify_structure(Input, syls(N, approx)) :- list_all_approx(Input, N, 1, _).
-% classify_structure(Input, syls(N, approx(NumMissed))) :- list_all_approx(Input, N, 1, NumMissed).
 classify_structure(Input, lines(N)) :- length(Input, N).
+
+% SPECIFIC STRUCTURES, USED TO CREATE MODEL
+classify_structure(Input, lines_14) :- length(Input, 14).
+classify_structure(Input, lines_19) :- length(Input, 19).
+classify_structure(Input, iambic_pentameter) :- list_all_approx(Input, 10, 1, _).
+
 
 
 classify_styles(Analysis, Structure, Classes) :-
@@ -78,3 +100,8 @@ list_all_approx([tuple(X, _)|XS], N, Margin, Ret) :-
     \+ X = N,
     X >= N - Margin, X < N + Margin + 1,
     list_all_approx(XS, N, Margin, Missed), Ret is Missed + 1.
+
+attribute_list([], []).
+attribute_list([tuple(Attribute, _)|Attributes], [Attribute|Rest]) :- attribute(Attribute), attribute_list(Attributes, Rest), !.
+attribute_list([Attribute|Attributes], [Attribute|Rest]) :- attribute(Attribute), attribute_list(Attributes, Rest), !.
+attribute_list([_|Attributes], Rest) :- attribute_list(Attributes, Rest).
