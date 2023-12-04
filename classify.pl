@@ -1,4 +1,4 @@
-:- module(classify, [classify/1, extract_attributes/1]).
+:- module(classify, [classify/1, extract_attributes/1, find_most_likely_author/1]).
 
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
 :- use_module(profile, [haiku/2]).
@@ -71,6 +71,14 @@ classify_authors(Structures, Styles, Rhymes, Authors) :-
     findall(tuple(Author, Matching_properties), classify_author(Structures, Styles, Rhymes, Author, Matching_properties), Authors), !.
 
 classify_author(Structure,_,Rhymes, tuple(shakespeare, Precision), Matching_properties) :- 
+    check_property(lines(14), Structure, 0, N1), 
+    check_property(syls(10, P1), Structure, N1, N2), 
+    check_property(tuple(english_sonnet, P2), Rhymes, N2, N3), 
+    lowest_precision([P1, P2], Precision), 
+    Matching_properties = N3.
+
+
+classify_author(Structure,_,Rhymes, tuple(william_shakespeare, Precision), Matching_properties) :- 
     check_property(lines(14), Structure, 0, N1), 
     check_property(syls(10, P1), Structure, N1, N2), 
     check_property(tuple(english_sonnet, P2), Rhymes, N2, N3), 
