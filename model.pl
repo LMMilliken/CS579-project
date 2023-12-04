@@ -7,7 +7,7 @@
 
 create_model :- create_model(Model), writeln(Model).
 
-create_model(Model) :- extract_attributes(In_text), create_model(In_text, Model).
+create_model(Model) :-  extract_attributes(In_text),create_model(In_text, Model), !.
 create_model(In_text, model(Symbols, Preds)) :-
 
     % create symbols

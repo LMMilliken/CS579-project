@@ -48,16 +48,6 @@
 :- [semRulesLambda].
 
 /*========================================================================
-   Driver For Prohject
-========================================================================*/
-
-lambdaProject:-
-	readLine(Question),
-	readLine(Text),
-	write("\nThis is the text you passed me"), write(Text),
-	write("\nThis is the Question"), write(Question).
-
-/*========================================================================
    Driver Predicates
 ========================================================================*/
 
