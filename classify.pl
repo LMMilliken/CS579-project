@@ -1,7 +1,6 @@
 :- module(classify, [classify/1, extract_attributes/1, find_most_likely_author/1]).
 
 :- use_module(cnt, [load_syllables/1, analyse_lines/1, analyse_lines/2, read_input/1]).
-:- use_module(profile, [haiku/2]).
 :- use_module(rhymesChecker, [understand_structure/3]).
 :- use_module(utils, [map/3, end/2, max_tuples/2, lowest_precision/2, format_tuples/2]).
 :- use_module(attributes, [attribute/1]).
